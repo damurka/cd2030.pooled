@@ -77,27 +77,31 @@ ui <- dashboardPage(
 
 server <- function(input, output, session) {
 
-  cache <- init_CacheConnection()$reactive()
+  cache <- setupServer('setup')
+
+  # cache <- init_CacheConnection()$reactive()
 
   observeEvent(cache(), {
-    data <- read_csv('data/Pooled_National_Coverage_Estimates.csv', show_col_types = FALSE) %>%
-      mutate(across(where(is.numeric), ~ round(.x, 0)))
-    admin1 <- read_csv('data/Pooled_Admin1_Coverage_Estimates.csv', show_col_types = FALSE) %>%
-      mutate(across(where(is.numeric), ~ round(.x, 0)))
-    dqa <- read_csv('data/Pooled_National_DQA_overall.csv', show_col_types = FALSE) %>%
-      mutate(across(where(is.numeric), ~ round(.x, 0)))
+    req(cache())
+    # data <- read_csv('data/Pooled_National_Coverage_Estimates.csv', show_col_types = FALSE) %>%
+    #   mutate(across(where(is.numeric), ~ round(.x, 0)))
+    # admin1 <- read_csv('data/Pooled_Admin1_Coverage_Estimates.csv', show_col_types = FALSE) %>%
+    #   mutate(across(where(is.numeric), ~ round(.x, 0)))
+    # dqa <- read_csv('data/Pooled_National_DQA_overall.csv', show_col_types = FALSE) %>%
+    #   mutate(across(where(is.numeric), ~ round(.x, 0)))
 
-    cache()$set_national_estimates(data)
-    cache()$set_regional_estimates(admin1)
-    cache()$set_quality_data(dqa)
+    # cache()$set_national_estimates(data)
+    # cache()$set_regional_estimates(admin1)
+    # cache()$set_quality_data(dqa)
 
     shinyjs::delay(500, {
       updateHeader()
       shinyjs::addClass(selector = 'body', class = 'fixed')
     })
-  }, once = TRUE)
 
-  setupServer('setup')
+    print(cache()$national_estimates)
+  })
+
   nationalQualityServer('national-quality', cache)
   regionalQualityServer('regional-quality', cache)
   nationalCoverageServer('national-coverage', cache)

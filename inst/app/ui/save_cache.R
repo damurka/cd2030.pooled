@@ -48,7 +48,7 @@ saveCacheServe <- function(id, cache) {
         }
 
         # Set the cache path
-        cache()$set_cache_path(file.path(path, paste0(cache()$country, '_', format(Sys.time(), '%Y%m%d%H%M'), ".rds")))
+        cache()$set_cache_path(file.path(path, paste0('pooled_', format(Sys.time(), '%Y%m%d%H%M'), ".rds")))
         showNotification("Directory set successfully!", type = "message")
       })
 

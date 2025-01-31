@@ -86,8 +86,9 @@ CacheConnection <- R6::R6Class(
       required_fields <- names(private$.data_template)
       missing_fields <- setdiff(required_fields, names(loaded_data))
       if (length(missing_fields) > 0) {
-        cd_abort(c('x' = paste('The following required fields are missing in the RDS file:',
-                               paste(missing_fields, collapse = ', '))))
+        # cd_abort(c('x' = paste('The following required fields are missing in the RDS file:',
+        #                        paste(missing_fields, collapse = ', '))))
+        stop(paste('The following required fields are missing in the RDS file:', paste(missing_fields, collapse = ', ')))
       }
       private$.in_memory_data <- loaded_data
     },
@@ -203,7 +204,8 @@ CacheConnection <- R6::R6Class(
         return(private$.in_memory_data[[field_name]])
       }
 
-      cd_abort(c('x' = '{.field field_name} is readonly'))
+      # cd_abort(c('x' = '{.field field_name} is readonly'))
+      stop(paste0(field_name, ' is readonly'))
     },
 
     setter = function(field_name, value, validation_exp = NULL) {
@@ -216,13 +218,15 @@ CacheConnection <- R6::R6Class(
         } else if (rlang::is_function(validation_exp)) {
           validation_exp
         } else {
-          cd_abort(c('x' = "{.arg validation} must be a function or a formula."))
+          # cd_abort(c('x' = "{.arg validation} must be a function or a formula."))
+          stop(paste0(validation, ' must be a function or a formula.'))
         }
       } else {
         function(x) TRUE
       }
       if (!validate_fn(value)) {
-        cd_abort(c('x' = 'Invalid value for field {.field field_name}.'))
+        # cd_abort(c('x' = 'Invalid value for field {.field field_name}.'))
+        stop(paste0('Invalid value for field ', field_name))
       }
       private$update_field(field_name, value)
     },

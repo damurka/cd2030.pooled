@@ -13,11 +13,17 @@ setupUI <- function(id) {
     fluidRow(
       column(
         12,
-        directoryInput(
-          ns('directory_select'),
-          label = 'Upload Country data Data',
-          buttonLabel = 'Browse or Drop...',
-          accept = c('.csv', '.xls', 'xlsx')
+        # directoryInput(
+        #   ns('directory_select'),
+        #   label = 'Upload Country data Data',
+        #   buttonLabel = 'Browse or Drop...',
+        #   accept = c('.csv', '.xls', 'xlsx')
+        # ),
+        shinyDirLink(
+          ns('choose_dir'),
+          label = 'Browse or Drop...',
+          title = 'Upload Country data Data',
+          icon = icon('folder-open')
         ),
 
         messageBoxUI(ns('feedback'))
@@ -36,131 +42,80 @@ setupServer <- function(id) {
 
       messageBox <- messageBoxServer('feedback')
 
-      observeEvent(input$directory_select, {
-        req(input$directory_select)
+      cache <- init_CacheConnection()$reactive()
+
+      shinyDirChoose(input, 'choose_dir', roots = getRoots(), allowDirCreate = TRUE)
+
+      # Set directory logic
+      selected_dir <- eventReactive(input$choose_dir, {
+        req(input$choose_dir)
+        parseDirPath(getRoots(), input$choose_dir)
+      })
+
+      observeEvent(selected_dir(), {
+        req(selected_dir())
+
+        path <- selected_dir()
+        if (is.null(path) || length(path) == 0 || nchar(path) == 0) {
+          showNotification("Invalid directory selected. Try again.", type = "error")
+          return()
+        }
 
         countries <- c('Ethiopia', 'Uganda', 'Tanzania', 'Rwanda', 'Kenya', 'Senegal', 'Burkina Faso',
                        'Cameroon', 'Cote_dIvoire', 'Chad', 'Ghana', 'CAR', 'DRC', 'Guinea',
                        'Liberia', 'Madagascar', 'Malawi', 'Mali', 'Mauritania', 'Mozambique',
                        'Niger', 'Nigeria', 'Sierra Leone', 'Somalia', 'Zambia', 'Zimbabwe')
 
-        uploaded_files <- input$directory_select #%>%
-          # filter(name %in% countries)
+        quality_data <<- NULL
+        national_data <<- NULL
+        admin1_data <<- NULL
 
-        print(uploaded_files)
+        walk(countries, ~ {
 
-        # missing_files <- setdiff(required_files, uploaded_files$name)
-        #
-        # log_messages('Files uploaded')
-        #
-        # # Log missing files and exit if any are not found
-        # if (length(missing_files) > 0) {
-        #   log_messages(paste(
-        #     log_messages(),
-        #     paste('Missing required files:', paste(missing_files, collapse = ', ')),
-        #     sep = '\n'
-        #   ))
-        #   return()  # Exit early if required files are missing
-        # }
-        #
-        # uploaded_files %>%
-        #   split(seq_len(nrow(.))) %>%
-        #   walk(~ {
-        #
-        #     tryCatch({
-        #       file_path <- .x$datapath
-        #
-        #       tryCatch(
-        #         cd2030:::check_file_path(file_path),
-        #         error = function(e) {
-        #           new_log <- clean_error_message(e)
-        #           log_messages(paste(log_messages(), new_log, sep = '\n'))
-        #           return()
-        #         }
-        #       )
-        #
-        #       if (grepl('^all_', .x$name)) {
-        #         survdata <- load_survey_data(file_path, country_iso())
-        #         cache()$set_national_survey(survdata)
-        #         new_log <- paste0('Loaded national survey data: '', .x$name, ''.')
-        #       } else if (grepl('^gregion_', .x$name)) {
-        #         gregion <- load_survey_data(file_path, country_iso(), admin_level = 'adminlevel_1')
-        #         cache()$set_regional_survey(gregion)
-        #         new_log <- paste0('Loaded regional survey data: '', .x$name, ''.')
-        #       } else if (grepl('^area_', .x$name)) {
-        #         area <- load_equity_data(file_path)
-        #         cache()$set_area_survey(area)
-        #         new_log <- paste0('Loaded area survey data: '', .x$name, ''.')
-        #       } else if (grepl('^meduc_', .x$name)) {
-        #         educ <- load_equity_data(file_path)
-        #         cache()$set_education_survey(educ)
-        #         new_log <- paste0('Loaded maternal education survey data: '', .x$name, ''.')
-        #       } else if (grepl('^wiq_', .x$name)) {
-        #         wiq <- load_equity_data(file_path)
-        #         cache()$set_wiq_survey(wiq)
-        #         new_log <- paste0('Loaded wealth index quintile survey data: '', .x$name, ''.')
-        #       } else {
-        #         new_log <- paste0('File '', .x$name, '' does not match any known pattern.')
-        #       }
-        #
-        #       log_messages(paste(log_messages(), new_log, sep = '\n'))
-        #     },
-        #     error = function(e) {
-        #       clean_message <- clean_error_message(e)
-        #       new_log <- paste0('Error processing file '', .x$name, '': ', clean_message)
-        #       log_messages(paste(log_messages(), new_log, sep = '\n'))
-        #     })
-        #   })
-      })
+          quality <- file.path(path, .x, 'code 1a output', 'Checks.xlsx')
+          national <- file.path(path, .x, 'code 2 output', 'National_Coverage_Estimates.xlsx')
+          admin1 <- file.path(path, .x, 'code 2 output', 'Admin1_Coverage_Estimates.xlsx')
 
-      cache <- eventReactive(input$hfd_file, {
-        req(input$hfd_file)
-
-        file_path <- input$hfd_file$datapath
-        file_name <- input$hfd_file$name
-        file_type <- tools::file_ext(file_name)
-
-        valid_types <- c('xls', 'xlsx', 'dta', 'rds')
-        if (!file_type %in% valid_types) {
-          messageBox$update_message('Upload failed: Unsupported file format.', 'error')
-          return(NULL)
-        }
-
-        tryCatch({
-          dt <- if (file_type %in% c('xls', 'xlsx')) {
-            load_excel_data(file_path)
-          } else if (file_type == 'dta') {
-            load_data(file_path)
+          if (file.exists(quality)) {
+            dqa_data <- read_excel(quality, sheet = "Overall score", skip = 1) %>%
+              mutate(country = .x)
+            quality_data <<- if (is.null(quality_data)) {
+              dqa_data
+            } else {
+              bind_rows(quality_data, dqa_data)
+            }
           } else {
-            NULL
+            message(paste("Quality data File not found for country:", .x))
           }
 
-          rds_path <- if (file_type == 'rds') {
-            file_path
+          if (file.exists(national)) {
+            nat <- read_excel(national)%>%
+              mutate(country = .x)
+            national_data <<- if (is.null(national_data)) {
+              nat
+            } else {
+              bind_rows(national_data, nat)
+            }
           } else {
-            NULL
+            message(paste("National File not found for country:", .x))
           }
 
-          messageBox$update_message(
-            paste('Upload successful: File', file_name, 'is ready.'),
-            'success'
-          )
-
-          cache_instance <- init_CacheConnection(
-            countdown_data = dt,
-            rds_path = rds_path
-          )$reactive()
-
-          cache_instance()
-        },
-        error = function(e) {
-          clean_message <- clean_error_message(e)
-          messageBox$update_message(
-            paste('Upload failed: ', clean_message),
-            'error'
-          )
-          NULL
+          if (file.exists(admin1)) {
+            adm1 <- read_excel(admin1) %>%
+              mutate(country = .x)
+            admin1_data <<- if (is.null(admin1_data)) {
+              adm1
+            } else {
+              bind_rows(admin1_data, adm1)
+            }
+          } else {
+            message(paste("Admin 1 File not found for country:", .x))
+          }
         })
+
+        cache()$set_national_estimates(national_data)
+        cache()$set_regional_estimates(admin1_data)
+        cache()$set_quality_data(quality_data)
       })
 
       downloadButtonServer(
