@@ -2,6 +2,7 @@ options(shiny.maxRequestSize = 2000*1024^2)
 options(future.globals.maxSize = 1 * 1024 * 1024 ^ 2)
 
 pacman::p_load(
+  cd2030.pooled,
   shiny,
   shinydashboard,
   dplyr,
