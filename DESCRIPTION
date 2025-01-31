@@ -1,0 +1,35 @@
+Package: cd2030.pooled
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: c(
+      person("David", "Kariuki", , "hello@damurka.com", role = c("aut", "cre"), 
+             comment = c(ORCID = "0009-0003-6159-1107")),
+      person("Martin", "Mutua", role = c("aut")),
+      person("Peter", "Kaberia", , "pkaberia@aphrc.org", role = c("aut")),
+      person("Godfrey", "Adero", , "gadero@aphrc.org", role = c("aut")),
+      person("Rornald", "Muhumuza", , "rmuhumuza@aphrc.org", role = c("aut")),
+      person("African Population and Health Research Center (APHRC)", 
+            role = c("cph", "fnd"))
+    )
+Description: What the package does (one paragraph).
+License: GPL (>= 3)
+Imports: 
+    cli,
+    dplyr,
+    ggplot2,
+    pacman,
+    R6,
+    rlang,
+    rmarkdown,
+    shiny,
+    tibble,
+    tidyr
+Suggests:
+    knitr,
+    spelling
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends: 
+    R (>= 2.10)
+LazyData: true

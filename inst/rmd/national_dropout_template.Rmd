@@ -1,0 +1,81 @@
+---
+title: "Pooled National Dropout --- Countdown Analysis"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cerulean
+    highlight: kate
+  word_document:
+    toc: false
+    reference_docx: report-template.docx
+  pdf_document:
+    toc: false
+    latex_engine: lualatex
+params:
+  cache: NULL
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  include = TRUE,
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  error = TRUE,
+  fig.width=7, 
+  fig.height=5, 
+  dpi=1200
+)
+
+library(cd2030.pooled)
+library(dplyr)
+
+cache <- params$cache
+national_estimates <- cache$national_estimates
+```
+
+## National Dropout Rate by Country
+
+### Penta 1 to Penta 3 Dropout Rate
+
+```{r}
+coverage_data <- process_dropout_data(national_estimates, indicator = 'cov_dropout_penta13_penta1')
+plot(coverage_data)
+```
+
+#### 📝 Notes 
+
+::: {custom-style="Style1"}
+
+---
+
+```{r, results='asis'}
+print_notes(cache, 'national_dropout', 'Penta1 to Penta3 Dropout')
+```
+
+---
+
+:::
+
+### Penta 3 to Measles 1 Dropout Rate
+
+```{r}
+coverage_data <- process_dropout_data(national_estimates, indicator = 'cov_dropout_penta3mcv1_penta1')
+plot(coverage_data)
+```
+
+#### 📝 Notes 
+
+::: {custom-style="Style1"}
+
+---
+
+```{r, results='asis'}
+print_notes(cache, 'national_dropout', 'Penta3 to Measles 1 Dropout')
+```
+
+---
+
+:::

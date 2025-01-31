@@ -1,0 +1,109 @@
+---
+title: "Pooled National Data Quality --- Countdown Analysis"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cerulean
+    highlight: kate
+  word_document:
+    toc: false
+    reference_docx: report-template.docx
+  pdf_document:
+    toc: false
+    latex_engine: lualatex
+params:
+  cache: NULL
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  include = TRUE,
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  error = TRUE,
+  fig.width=7, 
+  fig.height=5, 
+  dpi=1200
+)
+
+library(cd2030.pooled)
+library(dplyr)
+
+cache <- params$cache
+quality_data <- cache$quality_data
+```
+
+## National Data Quality by Country
+
+### Overall Data Quality
+
+```{r}
+coverage_data <- quality_data %>%
+          rename_with(tolower) %>%
+          process_coverage_data(indicator = 'overall')
+plot(coverage_data)
+```
+
+#### 📝 Notes 
+
+::: {custom-style="Style1"}
+
+---
+
+```{r, results='asis'}
+print_notes(cache, 'national_quality', 'Overall Data Quality')
+```
+
+---
+
+:::
+
+### Data Quality for only reported vaccines
+
+```{r}
+coverage_data <- quality_data %>%
+          rename_with(tolower) %>%
+          process_coverage_data(indicator = 'overall_vacc_only')
+plot(coverage_data)
+```
+
+#### 📝 Notes 
+
+::: {custom-style="Style1"}
+
+---
+
+```{r, results='asis'}
+print_notes(cache, 'national_quality', 'Quality for Reported Vaccines')
+```
+
+---
+
+:::
+
+### Data Quality for only Tracer vaccines
+
+```{r}
+coverage_data <- quality_data %>%
+          rename_with(tolower) %>%
+          process_coverage_data(indicator = 'overall_vacc_tracer')
+plot(coverage_data)
+```
+
+#### 📝 Notes 
+
+::: {custom-style="Style1"}
+
+---
+
+```{r, results='asis'}
+print_notes(cache, 'national_quality', 'Quality for Tracer Vaccines')
+```
+
+---
+
+:::
+
