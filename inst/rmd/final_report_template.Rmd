@@ -45,7 +45,8 @@ quality_data <- cache$quality_data
 coverage_data <- quality_data %>%
           rename_with(tolower) %>%
           process_coverage_data(indicator = 'overall')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -68,7 +69,8 @@ print_notes(cache, 'national_quality', 'Overall Data Quality')
 coverage_data <- quality_data %>%
           rename_with(tolower) %>%
           process_coverage_data(indicator = 'overall_vacc_only')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -91,7 +93,8 @@ print_notes(cache, 'national_quality', 'Quality for Reported Vaccines')
 coverage_data <- quality_data %>%
           rename_with(tolower) %>%
           process_coverage_data(indicator = 'overall_vacc_tracer')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -118,7 +121,8 @@ print_notes(cache, 'national_quality', 'Quality for Tracer Vaccines')
 
 ```{r}
 coverage_data <- process_regional_quality_data(quality_data)
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -145,7 +149,8 @@ print_notes(cache, 'regional_quality', 'Overall')
 
 ```{r}
 coverage_data <- process_coverage_data(.data = national_estimates, indicator = 'cov_measles1_penta1')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -166,7 +171,8 @@ print_notes(cache, 'national_coverage', 'Measles 1')
 
 ```{r}
 coverage_data <- process_coverage_data(.data = national_estimates, indicator = 'cov_penta3_penta1')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -187,7 +193,8 @@ print_notes(cache, 'national_coverage', 'Penta 3')
 
 ```{r}
 coverage_data <- process_coverage_data(.data = national_estimates, indicator = 'cov_bcg_penta1')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -208,7 +215,8 @@ print_notes(cache, 'national_coverage', 'BCG')
 
 ```{r}
 coverage_data <- process_coverage_data(.data = national_estimates, indicator = 'cov_rota2_penta1')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -229,7 +237,8 @@ print_notes(cache, 'national_coverage', 'Rota 2')
 
 ```{r}
 coverage_data <- process_coverage_data(.data = national_estimates, indicator = 'cov_measles2_penta1')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -256,7 +265,8 @@ print_notes(cache, 'national_coverage', 'Measles 2')
 
 ```{r}
 coverage_data <- process_regional_coverage_data(national_estimates)
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -283,7 +293,8 @@ print_notes(cache, 'regional_coverage', 'Overall')
 
 ```{r}
 coverage_data <- process_dropout_data(national_estimates, indicator = 'cov_dropout_penta13_penta1')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -304,7 +315,8 @@ print_notes(cache, 'national_dropout', 'Penta1 to Penta3 Dropout')
 
 ```{r}
 coverage_data <- process_dropout_data(national_estimates, indicator = 'cov_dropout_penta3mcv1_penta1')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 

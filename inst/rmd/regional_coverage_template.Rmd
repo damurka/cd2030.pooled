@@ -42,7 +42,8 @@ national_estimates <- cache$national_estimates
 
 ```{r}
 coverage_data <- process_regional_coverage_data(national_estimates)
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 

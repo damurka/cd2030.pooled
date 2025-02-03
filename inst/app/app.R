@@ -27,6 +27,9 @@ source('ui/message_box.R')
 source('ui/save_cache.R')
 source('ui/download_report.R')
 
+source('modules/introduction.R')
+source('modules/setup.R')
+source('modules/page_object_config.R')
 source('modules/national_quality.R')
 source('modules/regional_quality.R')
 source('modules/national_coverage.R')
@@ -34,8 +37,6 @@ source('modules/regional_coverage.R')
 source('modules/national_dropout.R')
 source('modules/subnational_analysis.R')
 source('modules/subnational_dropout.R')
-source('modules/page_object_config.R')
-source('modules/setup.R')
 
 ui <- dashboardPage(
   skin = 'green',
@@ -62,7 +63,7 @@ ui <- dashboardPage(
       tags$link(rel = "stylesheet", type = 'text/css', href = "bootstrap-icons.css")
     ),
     tabItems(
-      tabItem(tabName = 'introduction', fluidPage(h1('Introduction'))),
+      tabItem(tabName = 'introduction', introductionUI('introduction')),
       tabItem(tabName = 'setup', setupUI('setup')),
       tabItem(tabName = 'national-quality', nationalQualityUI('national-quality')),
       tabItem(tabName = 'regional-quality', regionalQualityUI('regional-quality')),
@@ -98,10 +99,9 @@ server <- function(input, output, session) {
       updateHeader()
       shinyjs::addClass(selector = 'body', class = 'fixed')
     })
-
-    print(cache()$national_estimates)
   })
 
+  introductionServer('introduction')
   nationalQualityServer('national-quality', cache)
   regionalQualityServer('regional-quality', cache)
   nationalCoverageServer('national-coverage', cache)

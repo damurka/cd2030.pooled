@@ -13,24 +13,15 @@ setupUI <- function(id) {
     fluidRow(
       column(
         12,
-        # directoryInput(
-        #   ns('directory_select'),
-        #   label = 'Upload Country data Data',
-        #   buttonLabel = 'Browse or Drop...',
-        #   accept = c('.csv', '.xls', 'xlsx')
-        # ),
         shinyDirLink(
           ns('choose_dir'),
-          label = 'Browse or Drop...',
-          title = 'Upload Country data Data',
+          label = 'Upload Country Data',
+          title = 'Browse or Drop...',
           icon = icon('folder-open')
         ),
 
         messageBoxUI(ns('feedback'))
       )
-    ),
-    fluidRow(
-      column(4, downloadButtonUI(ns('download_data')))
     )
   )
 }
@@ -70,6 +61,8 @@ setupServer <- function(id) {
         national_data <<- NULL
         admin1_data <<- NULL
 
+        messageBox$update_message('Loading files', 'success')
+
         walk(countries, ~ {
 
           quality <- file.path(path, .x, 'code 1a output', 'Checks.xlsx')
@@ -85,7 +78,7 @@ setupServer <- function(id) {
               bind_rows(quality_data, dqa_data)
             }
           } else {
-            message(paste("Quality data File not found for country:", .x))
+            messageBox$add_message(paste("Quality data File not found for country:", .x), 'error')
           }
 
           if (file.exists(national)) {
@@ -97,7 +90,7 @@ setupServer <- function(id) {
               bind_rows(national_data, nat)
             }
           } else {
-            message(paste("National File not found for country:", .x))
+            messageBox$add_message(paste("National File not found for country:", .x), 'error')
           }
 
           if (file.exists(admin1)) {
@@ -109,13 +102,15 @@ setupServer <- function(id) {
               bind_rows(admin1_data, adm1)
             }
           } else {
-            message(paste("Admin 1 File not found for country:", .x))
+            messageBox$add_message(paste("Admin 1 File not found for country:", .x), 'error')
           }
         })
 
         cache()$set_national_estimates(national_data)
         cache()$set_regional_estimates(admin1_data)
         cache()$set_quality_data(quality_data)
+
+        messageBox$add_message('Loading files completed', 'success')
       })
 
       downloadButtonServer(

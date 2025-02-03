@@ -44,7 +44,8 @@ quality_data <- cache$quality_data
 coverage_data <- quality_data %>%
           rename_with(tolower) %>%
           process_coverage_data(indicator = 'overall')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -67,7 +68,8 @@ print_notes(cache, 'national_quality', 'Overall Data Quality')
 coverage_data <- quality_data %>%
           rename_with(tolower) %>%
           process_coverage_data(indicator = 'overall_vacc_only')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
@@ -90,7 +92,8 @@ print_notes(cache, 'national_quality', 'Quality for Reported Vaccines')
 coverage_data <- quality_data %>%
           rename_with(tolower) %>%
           process_coverage_data(indicator = 'overall_vacc_tracer')
-plot(coverage_data)
+plot(coverage_data) +
+  cd_report_theme()
 ```
 
 #### 📝 Notes 
