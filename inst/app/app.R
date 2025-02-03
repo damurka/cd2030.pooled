@@ -7,6 +7,7 @@ pacman::p_load(
   shinydashboard,
   dplyr,
   readr,
+  readxl,
   plotly,
   rlang,
   promises,
