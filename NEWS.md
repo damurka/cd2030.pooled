@@ -1,3 +1,7 @@
+# cd2030.pooled 2.0.3
+
+* Portuguese: the app reads as Portuguese is written in Mozambique and Angola (European norm) instead of Brazilian Portuguese.
+
 # cd2030.pooled 2.0.2
 
 * The denominator options read "ANC1 population growth" and "Penta1 population growth" (`anc1derived`,
