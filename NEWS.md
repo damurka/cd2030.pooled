@@ -1,3 +1,8 @@
+# cd2030.pooled 2.0.2
+
+* The denominator options read "ANC1 population growth" and "Penta1 population growth" (`anc1derived`,
+  `penta1derived`), the labels of cd2030.core's data dictionary. Requires cd2030.core 1.3.1.
+
 # cd2030.pooled 2.0.1
 
 Documentation only; no change to the app.
