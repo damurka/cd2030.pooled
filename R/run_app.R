@@ -173,8 +173,10 @@ run_app <- function(pre_loaded_dir = Sys.getenv("CDSUITE_SHINY_SELECTED_FILE", u
       new <- data.frame(name = picked$name[keep], size = picked$size[keep], path = picked$datapath[keep], include = TRUE, stringsAsFactors = FALSE)
       rv$files <- rbind(rv$files[!rv$files$name %in% new$name, , drop = FALSE], new)
     }
+    # the files DataSuite opened the app with (a folder): added as the server starts, outside any observer, where
+    # reading the file list (rv) needs isolate()
     if (using_local_files) {
-      add_files(data.frame(name = basename(pooled_files), size = file.size(pooled_files), datapath = pooled_files))
+      isolate(add_files(data.frame(name = basename(pooled_files), size = file.size(pooled_files), datapath = pooled_files)))
     }
     observeEvent(input$rds_files, {
       add_files(input$rds_files)
