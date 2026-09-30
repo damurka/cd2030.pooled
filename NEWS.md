@@ -1,3 +1,10 @@
+# cd2030.pooled 2.0.4
+
+* The report builder is Quire (datasuite.ui 0.4.0, quire 0.2.17): tables can be aligned (numbers and text apart).
+* Opened on a folder, its files are added without the reactive-context error.
+* Tables show their own loader.
+* Requires cd2030.core 1.3.5, datasuite.ui 0.4.0 and quire 0.2.17.
+
 # cd2030.pooled 2.0.3
 
 * Portuguese: the app reads as Portuguese is written in Mozambique and Angola (European norm) instead of Brazilian Portuguese.

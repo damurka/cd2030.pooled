@@ -129,7 +129,7 @@ pooled_kind_server <- function(id, kind_key, pooled, file_name, just_built, shar
         div(
           class = "pooled-card",
           div(class = "pooled-card__head", tags$h3("Data"), tags$span(class = "pooled-muted", paste0(dname(), " \u00b7 ", format(nrow(dff()), big.mark = ","), " rows"))),
-          cd_spinner(reactableOutput(ns("table")), i18n = i18n)
+          cd_table_spinner(reactableOutput(ns("table")), i18n = i18n)
         )
       )
     })
@@ -187,7 +187,7 @@ pooled_graph_grid <- function(ns, kind, d, measure, datasets) {
     trend = pooled_graph_card(paste(m, "over time"), "Each line is one country.", plotOutput(ns("g_trend"), height = "320px"), 2),
     rank = pooled_graph_card("Ranking", "Latest year, highest first.", plotOutput(ns("g_rank"), height = "300px")),
     spread = pooled_graph_card("Spread across areas", "Lowest, median and highest.", plotOutput(ns("g_spread"), height = "300px")),
-    change = pooled_graph_card("Change since the first year", "Largest change first.", reactableOutput(ns("t_change"))),
+    change = pooled_graph_card("Change since the first year", "Largest change first.", cd_table_spinner(reactableOutput(ns("t_change")))),
     dots = pooled_graph_card("Survey coverage by country", "Each dot is one country. Compare how far apart they are.", plotOutput(ns("g_dots"), height = "340px"), 2),
     col_a = pooled_graph_card("Neonatal mortality", "From the national estimates.", plotOutput(ns("g_col_a"), height = "280px")),
     col_b = pooled_graph_card("Survey year", "The year each country's survey values come from.", plotOutput(ns("g_col_b"), height = "280px")),
@@ -420,7 +420,7 @@ pooled_extract_server <- function(id, pooled, file_name, just_built, open_piece,
       keys <- paste0("d", seq_along(nm))
       tagList(
         cd_tab_strip(ns, as.list(stats::setNames(nm, keys)), keys[match(cur, nm)]),
-        div(style = "padding-top: 12px;", reactableOutput(ns("preview_table"))),
+        div(style = "padding-top: 12px;", cd_table_spinner(reactableOutput(ns("preview_table")))),
         div(class = "pooled-muted", style = "margin-top: 8px;", paste0("Showing up to 6 of ", format(nrow(piece()$datasets[[cur]]), big.mark = ","), " rows for ", cur, "."))
       )
     })

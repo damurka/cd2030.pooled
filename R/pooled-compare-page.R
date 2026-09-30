@@ -227,7 +227,7 @@ pooled_all_server <- function(id, pooled, file_name, just_built, shared, i18n) {
                   div(class = "pooled-tools",
                       tags$a(id = ns("dl_csv"), class = "shiny-download-link cd-button", href = "", target = "_blank", download = NA, tags$i(class = "fa fa-file-csv"), " CSV"),
                       tags$a(id = ns("dl_xlsx"), class = "shiny-download-link cd-button", href = "", target = "_blank", download = NA, tags$i(class = "fa fa-file-excel"), " Excel"))),
-              cd_spinner(reactableOutput(ns("table")), i18n = i18n)
+              cd_table_spinner(reactableOutput(ns("table")), i18n = i18n)
             )
           )
         )
