@@ -103,7 +103,6 @@ pooled_compare_server <- function(id, pooled, file_name, just_built, shared, i18
         return(tagList(pooled_file_bar(ns, file_name(), p, just_built()),
                        pooled_banner("info", "This file has no facility coverage to compare", "Compare countries needs the Coverage - National table. Build the file with everything included, or with the standard tables.")))
       }
-      n_countries <- length(unique(cov()$country))
       wuenic <- !is.null(datasets()[["WUENIC Estimates"]])
       tagList(
         pooled_file_bar(ns, file_name(), p, just_built()),
@@ -111,19 +110,19 @@ pooled_compare_server <- function(id, pooled, file_name, just_built, shared, i18
         div(class = "pooled-note", style = "margin-top: 12px;", POOLED_COMPARE_BLURB[[tab()]]),
         switch(tab(),
           care = pooled_graph_card(paste0("Continuum of care, ", pooled_view_year(cov(), years(), indicators())), "Facility coverage, sorted by the average across the indicators.",
-                                   plotOutput(ns("g_care"), height = paste0(max(340, 32 * n_countries + 110), "px")), 2),
+                                   cd_plot_ui(ns("g_care")), 2),
           tri = tagList(
             if (!wuenic) pooled_banner("info", "No WUENIC estimates in this file", "The plots show facility and survey only. Build the file with everything included to add WUENIC."),
             div(class = "pooled-grid",
-                pooled_graph_card("DTP3 / Penta3 coverage", "Each shape is one source.", plotOutput(ns("g_tri_a"), height = paste0(max(360, 26 * n_countries + 90), "px"))),
-                pooled_graph_card("MCV1 / Measles 1 coverage", "Each shape is one source.", plotOutput(ns("g_tri_b"), height = paste0(max(360, 26 * n_countries + 90), "px"))))
+                pooled_graph_card("DTP3 / Penta3 coverage", "Each shape is one source.", cd_plot_ui(ns("g_tri_a"))),
+                pooled_graph_card("MCV1 / Measles 1 coverage", "Each shape is one source.", cd_plot_ui(ns("g_tri_b"))))
           ),
           change = div(class = "pooled-grid", lapply(seq_along(quad_indicators()), function(i) {
             ind <- quad_indicators()[[i]]
-            pooled_graph_card(pooled_label_for(ind), "Level now against change over the period.", plotOutput(ns(paste0("g_q", i)), height = "320px"))
+            pooled_graph_card(pooled_label_for(ind), "Level now against change over the period.", cd_plot_ui(ns(paste0("g_q", i))))
           })),
           trends = pooled_graph_card("Facility coverage trends", "Median and interquartile range across the countries chosen.",
-                                     plotOutput(ns("g_band"), height = paste0(max(300, ceiling(length(indicators()) / 2) * 250 + 40), "px")), 2)
+                                     cd_plot_ui(ns("g_band")), 2)
         )
       )
     })
@@ -135,25 +134,44 @@ pooled_compare_server <- function(id, pooled, file_name, just_built, shared, i18
       head(if (length(pref) >= 2) pref else indicators(), 4)
     })
 
-    output$g_care <- renderPlot(pooled_plot_care(cov(), indicators(), pooled_view_year(cov(), years(), indicators())), res = 96)
+    # ---- graphs, each with the chart tools (pooled_plot_server()): what each draws is also its data download -----------
+    about <- function(graph, ...) {
+      extra <- list(...)
+      function() list(kind = paste0("pooled_compare_", graph), options = c(list(indicators = indicators(), years = years()), lapply(extra, function(f) f())))
+    }
+    pooled_plot_server(
+      "g_care", i18n,
+      data = reactive(pooled_care_data(cov(), indicators(), pooled_view_year(cov(), years(), indicators()))),
+      draw = function(d) pooled_plot_care(cov(), indicators(), pooled_view_year(cov(), years(), indicators())),
+      filename = "pooled_continuum_of_care", about = about("care")
+    )
 
-    tri <- function(cov_col, param_col, wuenic_col, title) {
+    tri_data <- function(cov_col, param_col, wuenic_col) reactive({
       need <- intersect(c("Coverage - National", "Parameters", "WUENIC Estimates"), names(datasets()))
       ds <- lapply(datasets()[need], function(d) pooled_filter(d, shared$countries(), NULL))
-      pooled_plot_triangulation(pooled_triangulation_data(ds, cov_col, param_col, wuenic_col, years()), title)
-    }
-    output$g_tri_a <- renderPlot(tri("cov_penta3", "penta3", "cov_penta3_wuenic", NULL), res = 96)
-    output$g_tri_b <- renderPlot(tri("cov_measles1", "measles1", "cov_measles1_wuenic", NULL), res = 96)
+      pooled_triangulation_data(ds, cov_col, param_col, wuenic_col, years()) %||% data.frame()
+    })
+    pooled_plot_server("g_tri_a", i18n, data = tri_data("cov_penta3", "penta3", "cov_penta3_wuenic"),
+                       draw = function(d) pooled_plot_triangulation(d, NULL), filename = "pooled_triangulation_penta3", about = about("triangulation_penta3"))
+    pooled_plot_server("g_tri_b", i18n, data = tri_data("cov_measles1", "measles1", "cov_measles1_wuenic"),
+                       draw = function(d) pooled_plot_triangulation(d, NULL), filename = "pooled_triangulation_measles1", about = about("triangulation_measles1"))
 
     for (i in 1:4) local({
       k <- i
-      output[[paste0("g_q", k)]] <- renderPlot({
+      indicator <- reactive({
         ind <- quad_indicators()[k]
         req(!is.na(ind))
-        pooled_plot_quadrant(pooled_quadrant_data(cov(), ind, years()), NULL)
-      }, res = 96)
+        ind
+      })
+      pooled_plot_server(
+        paste0("g_q", k), i18n,
+        data = reactive(pooled_quadrant_data(cov(), indicator(), years()) %||% data.frame()),
+        draw = function(d) pooled_plot_quadrant(d, NULL),
+        filename = paste0("pooled_level_change_", k), about = about("level_change", indicator = indicator)
+      )
     })
-    output$g_band <- renderPlot(pooled_plot_band(cov(), indicators(), years()), res = 96)
+    pooled_plot_server("g_band", i18n, data = reactive(pooled_band_data(cov(), indicators(), years())),
+                       draw = function(d) pooled_plot_band(cov(), indicators(), years()), filename = "pooled_trends", about = about("trends"))
   })
 }
 

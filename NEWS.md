@@ -1,3 +1,11 @@
+# cd2030.pooled 2.0.5
+
+* The charts (Explore pooled data and Compare countries) have the chart tools of the other Countdown apps
+  (datasuite.ui's `cd_plot_server()`): customize, download as a picture, download the data (Excel), and DataSuite's AI
+  can list and read them. They are as tall as their content needs (at least 400 px), like the other apps' charts. A
+  chart with nothing to draw says so in the chart.
+* The charts' theme is built on cd2030.core's `cd_minimal_theme()` (cd2030.core 1.3.7); they look as before.
+
 # cd2030.pooled 2.0.4
 
 * The report builder is Quire (datasuite.ui 0.4.0, quire 0.2.17): tables can be aligned (numbers and text apart).

@@ -1,4 +1,5 @@
-# Charts that compare the countries in a pooled table. ggplot only; the app puts them in cards.
+# Charts that compare the countries in a pooled table. ggplot only; the app puts them in cards, on the shared chart
+# tools (pooled_plot_server()).
 
 POOLED_COLOURS <- c("#1f8a5f", "#2f6db5", "#b57f0c", "#9b5758", "#6b5bb5", "#3d444b", "#0e7c86", "#c2571a", "#7a8a1f", "#a13a76")
 
@@ -9,13 +10,54 @@ pooled_palette <- function(countries) {
 
 pooled_measure_label <- function(x) gsub("_", " ", x)
 
-pooled_theme <- function() {
-  ggplot2::theme_minimal(base_size = 13) +
-    ggplot2::theme(
-      panel.grid.minor = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_blank(),
-      legend.position = "none", plot.margin = ggplot2::margin(8, 8, 8, 8),
-      plot.title = ggplot2::element_text(face = "bold"), plot.caption = ggplot2::element_text(colour = "#5c6670")
-    )
+POOLED_MUTED <- "#5c6670" # captions and reference lines
+POOLED_GRID <- "#eceef0" # the grid lines of bars and dot plots
+
+# A bold title and a muted caption, on every chart but the heat map.
+pooled_text_theme <- function() {
+  ggplot2::theme(plot.title = ggplot2::element_text(face = "bold"), plot.caption = ggplot2::element_text(colour = POOLED_MUTED))
+}
+
+# The charts' theme: cd2030.core's minimal theme, no legend (each country is labelled or coloured as everywhere).
+# `grid`: "y" keeps the lines across (a time series), "x" the lines down (horizontal bars and dot plots).
+pooled_theme <- function(grid = c("y", "x")) {
+  grid <- match.arg(grid)
+  cd_minimal_theme(base_size = 13, grid = grid, grid_colour = if (grid == "x") POOLED_GRID) +
+    ggplot2::theme(legend.position = "none", plot.margin = ggplot2::margin(8, 8, 8, 8)) +
+    pooled_text_theme()
+}
+
+# One chart on datasuite.ui's chart tools (cd_plot_server()): the customize panel, the picture and data downloads, and
+# the app's AI. Call inside a module server, with the id of a cd_plot_ui(). `data`: a reactive, the table the chart is
+# drawn from (what its data download holds); `draw`: function(data) returning the chart; `filename`: the downloads'
+# name; `about`: what the chart is, for the AI (a function returning a list).
+pooled_plot_server <- function(id, i18n, data, draw, filename, about = NULL) {
+  # forced now: a caller's loop variable must not be read later, when the chart is first drawn
+  force(data); force(draw); force(filename); force(about)
+  cd_plot_server(
+    id = id,
+    i18n = i18n,
+    plot_data = data,
+    plot_fun = function(d) pooled_or_message(draw(d)),
+    plot_filename = reactive(filename),
+    excel_write_fun = function(wb, d) cd_add_sheet(wb, "Data", d),
+    about = about
+  )
+}
+
+# The chart, or, when it has nothing to draw (validate_rows() and the like), a chart that says so: the chart tools show
+# a chart's own validation message as a loader that never ends. req() (not ready yet) is passed on as it is.
+pooled_or_message <- function(chart) {
+  tryCatch(chart, shiny.silent.error = function(e) {
+    if (!nzchar(conditionMessage(e))) stop(e)
+    pooled_message_plot(conditionMessage(e))
+  })
+}
+
+pooled_message_plot <- function(message) {
+  ggplot2::ggplot() +
+    ggplot2::annotate("text", x = 0, y = 0, label = message, colour = POOLED_MUTED, size = 4.5) +
+    ggplot2::theme_void()
 }
 
 # Tables by area (admin 1 or district) have many rows per country and year: charts show the median across areas.
@@ -79,7 +121,7 @@ pooled_plot_rank <- function(df, measure, palette) {
     ggplot2::scale_fill_manual(values = palette) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.15))) +
     ggplot2::labs(x = pooled_measure_label(measure), y = NULL, subtitle = sub) +
-    pooled_theme() + ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_line(colour = "#eceef0"))
+    pooled_theme(grid = "x")
 }
 
 validate_rows <- function(d) {
@@ -99,7 +141,7 @@ pooled_plot_dots <- function(df, palette, cols = c("anc1", "penta1", "penta3", "
     ggplot2::geom_point(size = 3.6, na.rm = TRUE) +
     ggplot2::scale_colour_manual(values = palette, name = NULL) +
     ggplot2::labs(x = "Survey coverage (%)", y = NULL) +
-    pooled_theme() + ggplot2::theme(legend.position = "top", panel.grid.major.y = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_line(colour = "#eceef0"))
+    pooled_theme(grid = "x") + ggplot2::theme(legend.position = "top")
 }
 
 # One number per country as bars, e.g. neonatal mortality or the survey year (Parameters).
@@ -115,7 +157,7 @@ pooled_plot_col <- function(df, col, palette, label = NULL) {
     ggplot2::scale_fill_manual(values = palette) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.18))) +
     ggplot2::labs(x = label %||% pooled_measure_label(col), y = NULL) +
-    pooled_theme() + ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_line(colour = "#eceef0"))
+    pooled_theme(grid = "x")
 }
 
 # Overall score: one score per country, and what it is made of. The table may be long (one row per part) or wide.
@@ -139,7 +181,7 @@ pooled_plot_score_rank <- function(df, palette) {
     ggplot2::scale_fill_manual(values = palette) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.15))) +
     ggplot2::labs(x = "Average score", y = NULL, subtitle = "Average of the parts, highest at the top") +
-    pooled_theme() + ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_line(colour = "#eceef0"))
+    pooled_theme(grid = "x")
 }
 pooled_plot_heat <- function(df) {
   long <- pooled_score_parts(df)$long
@@ -149,7 +191,7 @@ pooled_plot_heat <- function(df) {
     ggplot2::geom_text(ggplot2::aes(label = round(value)), size = 3.8, colour = "#1f2328") +
     ggplot2::scale_fill_gradient(low = "#ffffff", high = "#5fbe96", na.value = "#f2f4f5", guide = "none") +
     ggplot2::labs(x = NULL, y = NULL, caption = "Darker is higher. Every cell shows its number.") +
-    ggplot2::theme_minimal(base_size = 13) + ggplot2::theme(panel.grid = ggplot2::element_blank(), axis.text.x = ggplot2::element_text(angle = 25, hjust = 1))
+    cd_minimal_theme(base_size = 13, grid = "none") + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 25, hjust = 1))
 }
 
 # The lowest, median and highest area in the latest year, for each country (District / Admin 1 tables).
@@ -166,7 +208,7 @@ pooled_plot_spread <- function(df, measure, palette) {
     ggplot2::geom_point(ggplot2::aes(x = mid), size = 3.6) +
     ggplot2::scale_colour_manual(values = palette) +
     ggplot2::labs(x = pooled_measure_label(measure), y = NULL, subtitle = "Lowest, median and highest area in each country's latest year") +
-    pooled_theme() + ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_line(colour = "#eceef0"))
+    pooled_theme(grid = "x")
 }
 
 # First year, latest year and the change, per country.

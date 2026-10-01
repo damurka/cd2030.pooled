@@ -143,18 +143,27 @@ pooled_kind_server <- function(id, kind_key, pooled, file_name, just_built, shar
                 defaultColDef = colDef(format = colFormat(digits = 2)))
     })
 
-    # ---- graphs (only the ones this kind's page draws are ever asked for) ------------------------------------------------
-    output$g_trend <- renderPlot(pooled_plot_trend(dff(), req(measure()), palette()), res = 96)
-    output$g_rank <- renderPlot(pooled_plot_rank(dff(), req(measure()), palette()), res = 96)
-    output$g_spread <- renderPlot({
+    # ---- graphs: only the ones this kind's page draws, each with the chart tools (pooled_plot_server()) -----------------
+    # the lowest, median and highest area: from the district table when the file has one
+    spread_data <- reactive({
       src <- if ("district" %in% names(kind$datasets) && kind$datasets[["district"]] %in% names(pooled()$datasets)) kind$datasets[["district"]] else dname()
-      pooled_plot_spread(pooled_filter(pooled()$datasets[[src]], shared$countries(), shared$years()), req(measure()), palette())
-    }, res = 96)
-    output$g_dots <- renderPlot(pooled_plot_dots(dff(), palette()), res = 96)
-    output$g_col_a <- renderPlot(pooled_plot_col(dff(), "nmr", palette(), "Neonatal mortality"), res = 96)
-    output$g_col_b <- renderPlot(pooled_plot_col(dff(), "survey_year", palette(), "Survey year"), res = 96)
-    output$g_score_rank <- renderPlot(pooled_plot_score_rank(dff(), palette()), res = 96)
-    output$g_score_heat <- renderPlot(pooled_plot_heat(dff()), res = 96)
+      pooled_filter(pooled()$datasets[[src]], shared$countries(), shared$years())
+    })
+    about <- function(graph) function() list(kind = paste0("pooled_", graph), options = list(dataset = dname(), measure = measure()))
+    graphs <- list(
+      trend = list(data = dff, draw = function(d) pooled_plot_trend(d, req(measure()), palette())),
+      rank = list(data = dff, draw = function(d) pooled_plot_rank(d, req(measure()), palette())),
+      spread = list(data = spread_data, draw = function(d) pooled_plot_spread(d, req(measure()), palette())),
+      dots = list(data = dff, draw = function(d) pooled_plot_dots(d, palette())),
+      col_a = list(data = dff, draw = function(d) pooled_plot_col(d, "nmr", palette(), "Neonatal mortality")),
+      col_b = list(data = dff, draw = function(d) pooled_plot_col(d, "survey_year", palette(), "Survey year")),
+      score_rank = list(data = dff, draw = function(d) pooled_plot_score_rank(d, palette())),
+      score_heat = list(data = dff, draw = function(d) pooled_plot_heat(d))
+    )
+    for (g in intersect(kind$graphs, names(graphs))) {
+      pooled_plot_server(paste0("g_", g), i18n, data = graphs[[g]]$data, draw = graphs[[g]]$draw,
+                         filename = paste0("pooled_", kind_key, "_", g), about = about(g))
+    }
     output$t_change <- renderReactable({
       d <- pooled_change_table(dff(), req(measure()))
       validate(need(!is.null(d), "There is nothing to compare for this selection."))
@@ -184,15 +193,15 @@ pooled_graph_card <- function(title, sub, body, span = 1) {
 pooled_graph_grid <- function(ns, kind, d, measure, datasets) {
   m <- if (is.null(measure)) "" else pooled_measure_label(measure)
   card <- list(
-    trend = pooled_graph_card(paste(m, "over time"), "Each line is one country.", plotOutput(ns("g_trend"), height = "320px"), 2),
-    rank = pooled_graph_card("Ranking", "Latest year, highest first.", plotOutput(ns("g_rank"), height = "300px")),
-    spread = pooled_graph_card("Spread across areas", "Lowest, median and highest.", plotOutput(ns("g_spread"), height = "300px")),
+    trend = pooled_graph_card(paste(m, "over time"), "Each line is one country.", cd_plot_ui(ns("g_trend")), 2),
+    rank = pooled_graph_card("Ranking", "Latest year, highest first.", cd_plot_ui(ns("g_rank"))),
+    spread = pooled_graph_card("Spread across areas", "Lowest, median and highest.", cd_plot_ui(ns("g_spread"))),
     change = pooled_graph_card("Change since the first year", "Largest change first.", cd_table_spinner(reactableOutput(ns("t_change")))),
-    dots = pooled_graph_card("Survey coverage by country", "Each dot is one country. Compare how far apart they are.", plotOutput(ns("g_dots"), height = "340px"), 2),
-    col_a = pooled_graph_card("Neonatal mortality", "From the national estimates.", plotOutput(ns("g_col_a"), height = "280px")),
-    col_b = pooled_graph_card("Survey year", "The year each country's survey values come from.", plotOutput(ns("g_col_b"), height = "280px")),
-    score_rank = pooled_graph_card("Overall score", "Highest first.", plotOutput(ns("g_score_rank"), height = "320px")),
-    score_heat = pooled_graph_card("Where the score comes from", "Each part of the score, by country.", plotOutput(ns("g_score_heat"), height = "320px"))
+    dots = pooled_graph_card("Survey coverage by country", "Each dot is one country. Compare how far apart they are.", cd_plot_ui(ns("g_dots")), 2),
+    col_a = pooled_graph_card("Neonatal mortality", "From the national estimates.", cd_plot_ui(ns("g_col_a"))),
+    col_b = pooled_graph_card("Survey year", "The year each country's survey values come from.", cd_plot_ui(ns("g_col_b"))),
+    score_rank = pooled_graph_card("Overall score", "Highest first.", cd_plot_ui(ns("g_score_rank"))),
+    score_heat = pooled_graph_card("Where the score comes from", "Each part of the score, by country.", cd_plot_ui(ns("g_score_heat")))
   )
   div(class = "pooled-grid", card[kind$graphs])
 }

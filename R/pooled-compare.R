@@ -50,8 +50,9 @@ pooled_plot_care <- function(cov, indicators, year) {
                                  guide = ggplot2::guide_colourbar(title.position = "top", title.hjust = 0.5, barheight = ggplot2::unit(9, "lines"))) +
     ggplot2::scale_x_discrete(position = "top") +
     ggplot2::labs(x = NULL, y = NULL, caption = paste0("Facility coverage in ", year, ". Darker is higher; every cell shows its number.")) +
-    ggplot2::theme_minimal(base_size = 13) +
-    ggplot2::theme(panel.grid = ggplot2::element_blank(), axis.text.x = ggplot2::element_text(face = "bold"), plot.caption = ggplot2::element_text(colour = "#5c6670"))
+    cd_minimal_theme(base_size = 13, grid = "none") +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(face = "bold")) +
+    pooled_text_theme()
 }
 
 # ---- source triangulation: facility, survey and WUENIC side by side -------------------------------------------------------
@@ -86,16 +87,16 @@ pooled_plot_triangulation <- function(d, title) {
   d$country <- factor(d$country, levels = lv)
   span <- d |> dplyr::group_by(country) |> dplyr::summarise(lo = min(value), hi = max(value), .groups = "drop")
   ggplot2::ggplot(d, ggplot2::aes(value, country)) +
-    ggplot2::geom_vline(xintercept = 90, linetype = "dotted", colour = "#5c6670", linewidth = 0.7) +
+    ggplot2::geom_vline(xintercept = 90, linetype = "dotted", colour = POOLED_MUTED, linewidth = 0.7) +
     ggplot2::geom_segment(data = span, ggplot2::aes(x = lo, xend = hi, y = country, yend = country), colour = "#c7ced4", linewidth = 1) +
     ggplot2::geom_point(ggplot2::aes(colour = source, shape = source), size = 3.2) +
     ggplot2::scale_colour_manual(values = POOLED_SOURCE_COLOURS, name = NULL) +
     ggplot2::scale_shape_manual(values = POOLED_SOURCE_SHAPES, name = NULL) +
     ggplot2::scale_x_continuous(limits = c(0, 105), breaks = seq(0, 100, 20)) +
     ggplot2::labs(x = "Coverage (%)", y = NULL, title = title, caption = "Dotted line: 90% target") +
-    ggplot2::theme_minimal(base_size = 12) +
-    ggplot2::theme(legend.position = "top", panel.grid.minor = ggplot2::element_blank(), panel.grid.major.y = ggplot2::element_line(colour = "#eceef0"),
-                   plot.title = ggplot2::element_text(face = "bold"), plot.caption = ggplot2::element_text(colour = "#5c6670"))
+    cd_minimal_theme(base_size = 12, grid = "major") +
+    ggplot2::theme(legend.position = "top", panel.grid.major.y = ggplot2::element_line(colour = POOLED_GRID)) +
+    pooled_text_theme()
 }
 
 # ---- level and change ---------------------------------------------------------------------------------------------------
@@ -121,14 +122,14 @@ pooled_plot_quadrant <- function(d, title) {
   med <- stats::median(d$level)
   far <- d |> dplyr::mutate(dist = abs(change - stats::median(change)) / (stats::mad(change) + 1) + abs(level - med) / (stats::mad(level) + 1)) |> dplyr::slice_max(dist, n = min(5, nrow(d)))
   ggplot2::ggplot(d, ggplot2::aes(level, change)) +
-    ggplot2::geom_hline(yintercept = 0, colour = "#5c6670") +
-    ggplot2::geom_vline(xintercept = med, linetype = "dashed", colour = "#5c6670") +
+    ggplot2::geom_hline(yintercept = 0, colour = POOLED_MUTED) +
+    ggplot2::geom_vline(xintercept = med, linetype = "dashed", colour = POOLED_MUTED) +
     ggplot2::geom_point(colour = "#1f8a5f", size = 3, alpha = 0.85) +
     ggplot2::geom_text(data = far, ggplot2::aes(label = country), hjust = -0.1, vjust = -0.6, size = 3.5, fontface = "bold", check_overlap = TRUE) +
     ggplot2::scale_x_continuous(limits = c(0, 110), breaks = seq(0, 100, 20)) +
     ggplot2::labs(x = paste0("Coverage ", per[2], " (%)"), y = paste0("Change ", per[1], " to ", per[2], " (points)"), title = title) +
-    ggplot2::theme_minimal(base_size = 12) +
-    ggplot2::theme(panel.grid.minor = ggplot2::element_blank(), plot.title = ggplot2::element_text(face = "bold"))
+    cd_minimal_theme(base_size = 12, grid = "major") +
+    pooled_text_theme()
 }
 
 # ---- trends: median and the middle half of countries, by year -------------------------------------------------------------
@@ -149,13 +150,14 @@ pooled_plot_band <- function(cov, indicators, years = NULL) {
   target <- data.frame(indicator = factor(pooled_label_for(intersect(indicators, POOLED_TARGET_COLUMNS)), levels = levels(d$indicator)))
   ggplot2::ggplot(d, ggplot2::aes(year, med)) +
     ggplot2::geom_ribbon(ggplot2::aes(ymin = q1, ymax = q3), fill = "#1f8a5f", alpha = 0.16) +
-    ggplot2::geom_hline(data = target, ggplot2::aes(yintercept = 90), linetype = "dotted", colour = "#5c6670") +
+    ggplot2::geom_hline(data = target, ggplot2::aes(yintercept = 90), linetype = "dotted", colour = POOLED_MUTED) +
     ggplot2::geom_line(colour = "#1f8a5f", linewidth = 1) +
     ggplot2::geom_point(colour = "#1f8a5f", size = 2.4) +
     ggplot2::facet_wrap(~indicator, ncol = 2) +
     ggplot2::scale_x_continuous(breaks = scales::breaks_pretty()) +
     ggplot2::scale_y_continuous(limits = c(0, 100)) +
     ggplot2::labs(x = NULL, y = "Coverage (%)", caption = "Line: median of countries. Band: the middle half of countries. Dotted: 90% target.") +
-    ggplot2::theme_minimal(base_size = 12) +
-    ggplot2::theme(panel.grid.minor = ggplot2::element_blank(), strip.text = ggplot2::element_text(face = "bold", hjust = 0), plot.caption = ggplot2::element_text(colour = "#5c6670"))
+    cd_minimal_theme(base_size = 12, grid = "major") +
+    ggplot2::theme(strip.text = ggplot2::element_text(face = "bold", hjust = 0)) +
+    pooled_text_theme()
 }
