@@ -104,6 +104,17 @@ extract_admin1_mortality <- function(cache) {
 extract_national_service_utilization <- function(cache) pooled_plain(cache$service_utilization_national) |> with_country(cache)
 extract_admin1_service_utilization <- function(cache) pooled_plain(cache$service_utilization_admin1) |> with_country(cache, adminlevel_1)
 
+# The Bayesian coverage model's estimates, for the models the country's dataset has (fitted on its Bayesian Analysis
+# pages and saved with it): a fit takes minutes, so none is made here. NULL when there is none.
+extract_bayes_estimates <- function(level, ...) {
+  function(cache) {
+    if (!is.function(cache$bayes_estimates)) return(NULL)
+    x <- pooled_plain(cache$bayes_estimates(level))
+    if (is.null(x) || !nrow(x)) return(NULL)
+    with_country(x, cache, ...)
+  }
+}
+
 # ---- the registry, in the order they are listed ---------------------------------------------------------------------------
 pooled_registry <- function() {
   def <- function(name, group, extract, standard = FALSE, rmncah_only = FALSE) {
@@ -120,6 +131,8 @@ pooled_registry <- function() {
     def("Coverage - Admin 1", "Coverage", extract_coverage_admin1, TRUE),
     def("National Mortality", "Mortality", extract_national_mortality, TRUE, TRUE),
     def("Admin 1 Mortality", "Mortality", extract_admin1_mortality, TRUE, TRUE),
+    def("Bayesian Estimates - National", "Coverage", extract_bayes_estimates("national")),
+    def("Bayesian Estimates - Admin 1", "Coverage", extract_bayes_estimates("adminlevel_1", dplyr::any_of("adminlevel_1"))),
     def("Mortality Ratios", "Mortality", f("mortality_ratios"), FALSE, TRUE),
     def("National Service Utilization", "Service utilization", extract_national_service_utilization, TRUE, TRUE),
     def("Admin 1 Service Utilization", "Service utilization", extract_admin1_service_utilization, TRUE, TRUE),

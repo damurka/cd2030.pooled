@@ -1,3 +1,10 @@
+# cd2030.pooled 2.0.9
+
+* A pooled file has the Bayesian coverage model's estimates: "Bayesian Estimates - National" and "Bayesian Estimates -
+  Admin 1" (coverage by year from 2010 to 2030, with its intervals, for each indicator a country fitted). They come
+  from the models saved in each country's dataset (its Bayesian Analysis pages); a country that fitted none is left
+  out of the two tables, without a warning. Requires cd2030.core 1.3.9.
+
 # cd2030.pooled 2.0.8
 
 * Requires cd2030.core 1.3.8 and datasuite.ui 0.4.3: zero-dose, under-vaccinated and measles2 coverage as the
