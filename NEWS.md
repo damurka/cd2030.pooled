@@ -1,3 +1,9 @@
+# cd2030.pooled 2.0.10
+
+* Requires cd2030.core 1.3.10: countries' datasets whose Bayesian models were saved with the sampler's draws (13 to
+  41 MB each) open without them, so pooling such files takes less memory.
+* The same version as cd2030.rmncah and cd2030.vaxx.
+
 # cd2030.pooled 2.0.9
 
 * A pooled file has the Bayesian coverage model's estimates: "Bayesian Estimates - National" and "Bayesian Estimates -
