@@ -1,3 +1,8 @@
+# cd2030.pooled 2.0.14
+
+* Changing the language works. The app called `update_lang()` without naming its package (shiny.i18n), so the
+  change failed with "could not find function", since 2.0.0.
+
 # cd2030.pooled 2.0.13
 
 * Requires cd2030.core 1.4.2 and datasuite.ui 0.5.1. The same version as cd2030.rmncah and cd2030.vaxx.

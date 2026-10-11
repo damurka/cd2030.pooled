@@ -138,7 +138,7 @@ run_app <- function(pre_loaded_dir = Sys.getenv("CDSUITE_SHINY_SELECTED_FILE", u
     cd_shell_server(output, cd_nav_sections, initial_tab = "build", data_ready = reactive(TRUE), i18n = i18n)
 
     show_language <- function(lang) {
-      update_lang(lang)
+      shiny.i18n::update_lang(lang)
       cd_set_language(session, lang)
     }
     observeEvent(input$selected_language, show_language(input$selected_language))

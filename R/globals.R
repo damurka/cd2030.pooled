@@ -3,6 +3,6 @@
 utils::globalVariables(c(
   ".data", "Change", "First", "Latest", "adminlevel_1", "change", "country", "dist",
   "district", "hi", "indicator", "iso3", "label_y", "level", "lo", "med",
-  "mid", "part", "q1", "q3", "runif", "update_lang", "value", "value_name",
+  "mid", "part", "q1", "q3", "runif", "value", "value_name",
   "year"
 ))
