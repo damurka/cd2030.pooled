@@ -1,3 +1,7 @@
+# cd2030.pooled 2.0.13
+
+* Requires cd2030.core 1.4.2 and datasuite.ui 0.5.1. The same version as cd2030.rmncah and cd2030.vaxx.
+
 # cd2030.pooled 2.0.12
 
 * Requires cd2030.core 1.4.1. The same version as cd2030.rmncah and cd2030.vaxx.
