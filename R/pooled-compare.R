@@ -44,13 +44,13 @@ pooled_plot_care <- function(cov, indicators, year) {
   d$country <- factor(d$country, levels = names(sort(tapply(d$value, d$country, mean, na.rm = TRUE), na.last = FALSE)))
   ggplot2::ggplot(d, ggplot2::aes(indicator, country, fill = value)) +
     ggplot2::geom_tile(colour = "#ffffff", linewidth = 1) +
-    ggplot2::geom_text(ggplot2::aes(label = ifelse(is.na(value), "", round(value)), colour = value > 58), size = 3.6, fontface = "bold", show.legend = FALSE) +
+    ggplot2::geom_text(ggplot2::aes(label = ifelse(is.na(value), "", round(value)), colour = value > 58), size = cd_type_scale()$label, fontface = "bold", show.legend = FALSE) +
     ggplot2::scale_colour_manual(values = c(`TRUE` = "#ffffff", `FALSE` = "#1f2328")) +
     ggplot2::scale_fill_gradient(low = "#f7fbf9", high = "#0e5a3d", limits = c(0, 100), na.value = "#f2f4f5", name = "Coverage (%)",
                                  guide = ggplot2::guide_colourbar(title.position = "top", title.hjust = 0.5, barheight = ggplot2::unit(9, "lines"))) +
     ggplot2::scale_x_discrete(position = "top") +
     ggplot2::labs(x = NULL, y = NULL, caption = paste0("Facility coverage in ", year, ". Darker is higher; every cell shows its number.")) +
-    cd_minimal_theme(base_size = 13, grid = "none") +
+    cd_minimal_theme(grid = "none") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(face = "bold")) +
     pooled_text_theme()
 }
@@ -94,7 +94,7 @@ pooled_plot_triangulation <- function(d, title) {
     ggplot2::scale_shape_manual(values = POOLED_SOURCE_SHAPES, name = NULL) +
     ggplot2::scale_x_continuous(limits = c(0, 105), breaks = seq(0, 100, 20)) +
     ggplot2::labs(x = "Coverage (%)", y = NULL, title = title, caption = "Dotted line: 90% target") +
-    cd_minimal_theme(base_size = 12, grid = "major") +
+    cd_minimal_theme(grid = "major") +
     ggplot2::theme(legend.position = "top", panel.grid.major.y = ggplot2::element_line(colour = POOLED_GRID)) +
     pooled_text_theme()
 }
@@ -125,10 +125,10 @@ pooled_plot_quadrant <- function(d, title) {
     ggplot2::geom_hline(yintercept = 0, colour = POOLED_MUTED) +
     ggplot2::geom_vline(xintercept = med, linetype = "dashed", colour = POOLED_MUTED) +
     ggplot2::geom_point(colour = "#1f8a5f", size = 3, alpha = 0.85) +
-    ggplot2::geom_text(data = far, ggplot2::aes(label = country), hjust = -0.1, vjust = -0.6, size = 3.5, fontface = "bold", check_overlap = TRUE) +
+    ggplot2::geom_text(data = far, ggplot2::aes(label = country), hjust = -0.1, vjust = -0.6, size = cd_type_scale()$label, fontface = "bold", check_overlap = TRUE) +
     ggplot2::scale_x_continuous(limits = c(0, 110), breaks = seq(0, 100, 20)) +
     ggplot2::labs(x = paste0("Coverage ", per[2], " (%)"), y = paste0("Change ", per[1], " to ", per[2], " (points)"), title = title) +
-    cd_minimal_theme(base_size = 12, grid = "major") +
+    cd_minimal_theme(grid = "major") +
     pooled_text_theme()
 }
 
@@ -157,7 +157,7 @@ pooled_plot_band <- function(cov, indicators, years = NULL) {
     ggplot2::scale_x_continuous(breaks = scales::breaks_pretty()) +
     ggplot2::scale_y_continuous(limits = c(0, 100)) +
     ggplot2::labs(x = NULL, y = "Coverage (%)", caption = "Line: median of countries. Band: the middle half of countries. Dotted: 90% target.") +
-    cd_minimal_theme(base_size = 12, grid = "major") +
+    cd_minimal_theme(grid = "major") +
     ggplot2::theme(strip.text = ggplot2::element_text(face = "bold", hjust = 0)) +
     pooled_text_theme()
 }

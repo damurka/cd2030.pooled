@@ -22,7 +22,7 @@ pooled_text_theme <- function() {
 # `grid`: "y" keeps the lines across (a time series), "x" the lines down (horizontal bars and dot plots).
 pooled_theme <- function(grid = c("y", "x")) {
   grid <- match.arg(grid)
-  cd_minimal_theme(base_size = 13, grid = grid, grid_colour = if (grid == "x") POOLED_GRID) +
+  cd_minimal_theme(grid = grid, grid_colour = if (grid == "x") POOLED_GRID) +
     ggplot2::theme(legend.position = "none", plot.margin = ggplot2::margin(8, 8, 8, 8)) +
     pooled_text_theme()
 }
@@ -56,7 +56,7 @@ pooled_or_message <- function(chart) {
 
 pooled_message_plot <- function(message) {
   ggplot2::ggplot() +
-    ggplot2::annotate("text", x = 0, y = 0, label = message, colour = POOLED_MUTED, size = 4.5) +
+    ggplot2::annotate("text", x = 0, y = 0, label = message, colour = POOLED_MUTED, size = cd_type_scale()$label) +
     ggplot2::theme_void()
 }
 
@@ -93,7 +93,7 @@ pooled_plot_trend <- function(df, measure, palette) {
   ggplot2::ggplot(d, ggplot2::aes(year, value, colour = country, group = country)) +
     ggplot2::geom_line(linewidth = 1) +
     ggplot2::geom_point(size = 1.8) +
-    ggplot2::geom_text(data = last, ggplot2::aes(y = label_y, label = country), hjust = -0.15, size = 3.8, fontface = "bold", show.legend = FALSE) +
+    ggplot2::geom_text(data = last, ggplot2::aes(y = label_y, label = country), hjust = -0.15, size = cd_type_scale()$label, fontface = "bold", show.legend = FALSE) +
     ggplot2::scale_colour_manual(values = palette) +
     ggplot2::scale_x_continuous(breaks = scales::breaks_pretty(), expand = ggplot2::expansion(mult = c(0.02, 0.22))) +
     ggplot2::labs(x = NULL, y = pooled_measure_label(measure), caption = if (pooled_is_by_area(df)) "Median across areas" else NULL) +
@@ -117,7 +117,7 @@ pooled_plot_rank <- function(df, measure, palette) {
   d$country <- factor(d$country, levels = d$country[order(d$value)])
   ggplot2::ggplot(d, ggplot2::aes(value, country, fill = country)) +
     ggplot2::geom_col(width = 0.65) +
-    ggplot2::geom_text(ggplot2::aes(label = format(round(value, 2), big.mark = ",")), hjust = -0.15, size = 3.8) +
+    ggplot2::geom_text(ggplot2::aes(label = format(round(value, 2), big.mark = ",")), hjust = -0.15, size = cd_type_scale()$label) +
     ggplot2::scale_fill_manual(values = palette) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.15))) +
     ggplot2::labs(x = pooled_measure_label(measure), y = NULL, subtitle = sub) +
@@ -153,7 +153,7 @@ pooled_plot_col <- function(df, col, palette, label = NULL) {
   d$country <- factor(d$country, levels = d$country[order(d$value)])
   ggplot2::ggplot(d, ggplot2::aes(value, country, fill = country)) +
     ggplot2::geom_col(width = 0.65) +
-    ggplot2::geom_text(ggplot2::aes(label = format(round(value, 3), big.mark = "", scientific = FALSE)), hjust = -0.15, size = 3.8) +
+    ggplot2::geom_text(ggplot2::aes(label = format(round(value, 3), big.mark = "", scientific = FALSE)), hjust = -0.15, size = cd_type_scale()$label) +
     ggplot2::scale_fill_manual(values = palette) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.18))) +
     ggplot2::labs(x = label %||% pooled_measure_label(col), y = NULL) +
@@ -177,7 +177,7 @@ pooled_plot_score_rank <- function(df, palette) {
   d$country <- factor(d$country, levels = d$country[order(d$value)])
   ggplot2::ggplot(d, ggplot2::aes(value, country, fill = country)) +
     ggplot2::geom_col(width = 0.65) +
-    ggplot2::geom_text(ggplot2::aes(label = round(value)), hjust = -0.2, size = 3.8) +
+    ggplot2::geom_text(ggplot2::aes(label = round(value)), hjust = -0.2, size = cd_type_scale()$label) +
     ggplot2::scale_fill_manual(values = palette) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.15))) +
     ggplot2::labs(x = "Average score", y = NULL, subtitle = "Average of the parts, highest at the top") +
@@ -188,10 +188,10 @@ pooled_plot_heat <- function(df) {
   validate_rows(long)
   ggplot2::ggplot(long, ggplot2::aes(part, country, fill = value)) +
     ggplot2::geom_tile(colour = "#ffffff", linewidth = 1.2) +
-    ggplot2::geom_text(ggplot2::aes(label = round(value)), size = 3.8, colour = "#1f2328") +
+    ggplot2::geom_text(ggplot2::aes(label = round(value)), size = cd_type_scale()$label, colour = "#1f2328") +
     ggplot2::scale_fill_gradient(low = "#ffffff", high = "#5fbe96", na.value = "#f2f4f5", guide = "none") +
     ggplot2::labs(x = NULL, y = NULL, caption = "Darker is higher. Every cell shows its number.") +
-    cd_minimal_theme(base_size = 13, grid = "none") + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 25, hjust = 1))
+    cd_minimal_theme(grid = "none") + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 25, hjust = 1))
 }
 
 # The lowest, median and highest area in the latest year, for each country (District / Admin 1 tables).

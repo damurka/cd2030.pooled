@@ -1,3 +1,8 @@
+# cd2030.pooled 2.0.15
+
+* The charts are written in the same sizes of text as the charts of cd2030.rmncah and cd2030.vaxx (cd2030.core
+  1.4.4, now required): a bold, centred title, and one size for the text drawn on a chart.
+
 # cd2030.pooled 2.0.14
 
 * Changing the language works. The app called `update_lang()` without naming its package (shiny.i18n), so the
